@@ -4,8 +4,6 @@ pragma abicoder v2;
 
 import '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
 import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
-import '@uniswap/v2-core/contracts/interfaces/IERC20.sol';
-import '@uniswap/v2-core/contracts/libraries/SafeMath.sol';
 
 interface IERC20{
     function balanceOf(address account) external view returns (uint256);

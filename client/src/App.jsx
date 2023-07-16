@@ -39,7 +39,7 @@ function App() {
       let p;
       // get provider
       if (window.ethereum) {
-        p = new ethers.BrowserProvider(window.ethereum)
+        p = new ethers.providers.Web3Provider(window.ethereum)
       }
       else {
         console.log("MetaMask not installed; using read-only defaults")
@@ -59,7 +59,7 @@ function App() {
 
       // set active chain ID
       const n = await p.getNetwork();
-      setChainId(ethers.toNumber(n.chainId));
+      setChainId(ethers.BigNumber.from(n.chainId).toNumber());
 
       // getting quoter
       const q = new ethers.Contract(import.meta.env.VITE_QUOTER_ADDRESS, QuoterV2.abi, s);
@@ -77,7 +77,7 @@ function App() {
     <>
       <Routes>
         <Route element={<Navbar />} path='/'>
-          <Route index element={<Home quoter={quoter} tokenList={tokenList} chainId={chainId} contract={contract} account={account} signer={signer}/>} />
+          <Route index element={<Home quoter={quoter} provider={provider} tokenList={tokenList} chainId={chainId} contract={contract} account={account} signer={signer}/>} />
           <Route path='tokens' element={<Tokens loader={loader} setLoader={setLoader} />} />
         </Route>
       </Routes>

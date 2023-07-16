@@ -13,7 +13,7 @@ export default function Home(props) {
     const dispatch = useDispatch();
     let { token0, token1 } = useSelector((state) => state.tokens);
     let loading = useSelector((state) => state.loading);
-    const { tokenList, chainId, contract, account, quoter } = props;
+    const { tokenList, chainId, contract, account, signer, quoter, provider } = props;
     const [tokenListDisplay, setTokenListDisplay] = useState({ visible: false, token: 0 });
     const [filteredTokens, setFilteredTokens] = useState(tokenList);
     const [quote, setQuote] = useState(null);
@@ -52,25 +52,39 @@ export default function Home(props) {
 
     const handleQuote = async (first, second) => {
         dispatch(updateLoading(true));
-        let data = await quoter.quoteExactInputSingle.staticCall(first.data.address, second.data.address, 3000, ethers.parseEther(first.count), 0);
+        let data = await quoter.callStatic.quoteExactInputSingle(first.data.address, second.data.address, 3000, ethers.utils.parseEther(first.count), 0);
 
         if (first === token0)
-            dispatch(updateToken1Count(parseFloat(ethers.formatUnits(data)).toFixed(2)));
+            dispatch(updateToken1Count(parseFloat(ethers.utils.formatUnits(data)).toFixed(2)));
         else
-            dispatch(updateToken0Count(parseFloat(ethers.formatUnits(data)).toFixed(2)));
+            dispatch(updateToken0Count(parseFloat(ethers.utils.formatUnits(data)).toFixed(2)));
 
         dispatch(updateLoading(false));
     }
 
     const handleSwap = async () => {
         console.log("clicked");
-        // const res = await contract.swapLINKForWETH(10);
-        await contract.swapLINKForWETH.send(10).then((res) => {
-            console.log("res: ", res);
-        }).catch((err) => {
-            console.log("error: ", err);
-        })
-        // console.log("response: ", res);
+
+        // await contract.swapLINKForWETH(10, {
+        //     gasLimit: ethers.utils.hexlify(1000000)
+        // }).then((res) => {
+        //     console.log("res: ", res);
+        // }).catch((err) => {
+        //     console.log("error: ", err);
+        // })
+
+        let res = await contract.approve(account, ethers.utils.parseEther('1'));
+        // console.log(token0, token1);
+        console.log("res: ", res);
+
+        // await signer.sendTransaction({
+        //     to: '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
+        //     gasLimit: 200000,
+        //     value: ethers.utils.parseEther('0.00001')._hex
+        // })
+        //     .then((res) => console.log("res: ", res))
+        //     .catch((err) => console.log("err: ", err));
+
     }
 
     const handleValueChange = async (e, token) => {
