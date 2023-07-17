@@ -25,9 +25,9 @@ function App() {
     const getTokenList = () => {
       axios({
         method: "GET",
-        url: 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
+        url: 'https://tokens.coingecko.com/uniswap/all.json'
       }).then((res) => {
-        setTokenList(res.data.tokens.slice(0,-2));
+        setTokenList(res.data.tokens);
       }).catch((err) => {
         console.log(err);
       });
@@ -37,6 +37,7 @@ function App() {
 
     const connectWallet = async () => {
       let p;
+      console.log(window.ethereum)
       // get provider
       if (window.ethereum) {
         p = new ethers.providers.Web3Provider(window.ethereum)
@@ -45,13 +46,14 @@ function App() {
         console.log("MetaMask not installed; using read-only defaults")
         p = ethers.getDefaultProvider();
       }
+
       // get signer
       let s = await p.getSigner();
       setSigner(s);
       setProvider(p);
       // get account
-      let a = await p.listAccounts();
-      setAccount(a[0].address);
+      let a = await provider.send("eth_requestAccounts", []);;
+      setAccount(a[0]);
       // intialize contract
       const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
       const c = new ethers.Contract(contractAddress, SimpleSwap.abi, s);

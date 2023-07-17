@@ -8,13 +8,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ethers } from 'ethers';
 import { updateLoading } from '../state/slices/loading';
 import Spinner from '../helpers/Spinner';
+import TokenList from '../helpers/TokenList';
 
 export default function Home(props) {
     const dispatch = useDispatch();
     let { token0, token1 } = useSelector((state) => state.tokens);
     let loading = useSelector((state) => state.loading);
+
     const { tokenList, chainId, contract, account, signer, quoter, provider } = props;
-    const [tokenListDisplay, setTokenListDisplay] = useState({ visible: false, token: 0 });
+
+    const [tokenListDisplay, setTokenListDisplay] = useState(false);
+    const [tokenNumDisplayed, setTokenNumDisplayed] = useState(0)
+
     const [filteredTokens, setFilteredTokens] = useState(tokenList);
     const [quote, setQuote] = useState(null);
 
@@ -45,9 +50,9 @@ export default function Home(props) {
         chainId && filterTokens();
     }, [tokenList, chainId]);
 
-    const handleTokenSelect = (token, data) => {
-        updateTokenFunc(token, data, 0);
-        setTokenListDisplay({ visible: false, token: 0 });
+    const handleTokenSelect = (tokenData) => {
+        updateTokenFunc(tokenNumDisplayed, tokenData, 0);
+        setTokenListDisplay(false);
     }
 
     const handleQuote = async (first, second) => {
@@ -63,28 +68,263 @@ export default function Home(props) {
     }
 
     const handleSwap = async () => {
-        console.log("clicked");
+        try {
+            const ERC20abi = [
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "name",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "string"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_spender",
+                            "type": "address"
+                        },
+                        {
+                            "name": "_value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "approve",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "bool"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "totalSupply",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_from",
+                            "type": "address"
+                        },
+                        {
+                            "name": "_to",
+                            "type": "address"
+                        },
+                        {
+                            "name": "_value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "transferFrom",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "bool"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "decimals",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint8"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [
+                        {
+                            "name": "_owner",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "balanceOf",
+                    "outputs": [
+                        {
+                            "name": "balance",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "symbol",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "string"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_to",
+                            "type": "address"
+                        },
+                        {
+                            "name": "_value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "transfer",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "bool"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [
+                        {
+                            "name": "_owner",
+                            "type": "address"
+                        },
+                        {
+                            "name": "_spender",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "allowance",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "payable": true,
+                    "stateMutability": "payable",
+                    "type": "fallback"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": true,
+                            "name": "owner",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": true,
+                            "name": "spender",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "Approval",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": true,
+                            "name": "from",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": true,
+                            "name": "to",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "Transfer",
+                    "type": "event"
+                }
+            ]
+            // establish connection with the ERC20 token contract of the token being swapped
+            const ERC20TokenContract = new ethers.Contract('0x326C977E6efc84E512bB9C30f76E30c160eD06FB', ERC20abi, signer);
 
-        // await contract.swapLINKForWETH(10, {
-        //     gasLimit: ethers.utils.hexlify(1000000)
-        // }).then((res) => {
-        //     console.log("res: ", res);
-        // }).catch((err) => {
-        //     console.log("error: ", err);
-        // })
+            // the contract address which needs approval to spend tokens
+            const targetAllowanceContract = import.meta.env.VITE_CONTRACT_ADDRESS;
 
-        let res = await contract.approve(account, ethers.utils.parseEther('1'));
-        // console.log(token0, token1);
-        console.log("res: ", res);
+            const uniswapRouterContract = "0xE592427A0AEce92De3Edee1F18E0157C05861564";
 
-        // await signer.sendTransaction({
-        //     to: '0x326C977E6efc84E512bB9C30f76E30c160eD06FB',
-        //     gasLimit: 200000,
-        //     value: ethers.utils.parseEther('0.00001')._hex
-        // })
-        //     .then((res) => console.log("res: ", res))
-        //     .catch((err) => console.log("err: ", err));
+            // approval of spending tokens from the account of the spender, approval request sent to ERC20 token
+            const maxApproval = ethers.BigNumber.from(2).pow(256).sub(1);
 
+            ERC20TokenContract.approve(targetAllowanceContract, maxApproval, {
+                gasLimit: 2000000
+            }).then(async (txn) => {
+                console.log("approval: ", txn);
+                let result = await contract.swapExactInputSingle(ethers.utils.parseEther('5'), {
+                    gasLimit: ethers.utils.hexlify(2000000)
+                })
+                console.log('Transaction successful:', result);
+            }).catch((err) => {
+                console.log("Error while approval: ", err);
+            })
+
+            // const reciept = await ethers.c
+            // const transaction = await provider.sendTra(txn.hash);
+            // console.log("txn: ", transaction);
+        } catch (error) {
+            console.error('Transaction failed:', error.message);
+        }
+    }
+
+    const getLog = async () => {
+        const receipt = await provider.getTransactionReceipt('0xa5f2123ff5fde19d3ca925405046e6f59e3dcdf421d43ad9852f835718b8cb39');
+        console.log(receipt);
     }
 
     const handleValueChange = async (e, token) => {
@@ -120,7 +360,10 @@ export default function Home(props) {
                                 </div>)
                             }
                             <div className="absolute inset-y-0 right-0 flex items-center px-2">
-                                <button onClick={() => setTokenListDisplay({ visible: true, token: 0 })} type="button" className="py-2 px-4  bg-pink-600 hover:bg-pink-700 focus:ring-pink-500 focus:ring-offset-pink-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-full">
+                                <button onClick={() => {
+                                    setTokenListDisplay(true);
+                                    setTokenNumDisplayed(0);
+                                }} type="button" className="py-2 px-4  bg-pink-600 hover:bg-pink-700 focus:ring-pink-500 focus:ring-offset-pink-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-full">
                                     {token0.data ? token0.data.symbol : ""}
                                 </button>
                             </div>
@@ -139,7 +382,10 @@ export default function Home(props) {
                                 </div>
                             )}
                             <div className="absolute inset-y-0 right-0 flex items-center px-2">
-                                <button onClick={() => setTokenListDisplay({ visible: true, token: 1 })} type="button" className="py-2 px-4  bg-pink-600 hover:bg-pink-700 focus:ring-pink-500 focus:ring-offset-pink-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-full">
+                                <button onClick={() => {
+                                    setTokenListDisplay(true);
+                                    setTokenNumDisplayed(1);
+                                }} type="button" className="py-2 px-4  bg-pink-600 hover:bg-pink-700 focus:ring-pink-500 focus:ring-offset-pink-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-full">
                                     {token1.data ? token1.data.symbol : ""}
                                 </button>
                             </div>
@@ -153,41 +399,15 @@ export default function Home(props) {
                         Swap
                     </button>
 
+                    <button type="button" onClick={getLog} className="py-2 px-4 mt-4 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white w-92 transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                        Status
+                    </button>
+
                 </div>
 
-                {tokenListDisplay.visible && (<div className="fixed top-0 w-full h-full">
-                    <div className='bg-[#F1FFEB] w-screen h-screen absolute opacity-50'>
-                    </div>
-                    <div className="text-xs md:text-base inset-0 z-10 w-full max-w-80 md:max-w-96 h-screen overflow-y-auto flex justify-center items-center z-10 absolute border-2">
-                        <div>
-                            <div className="container flex flex-col justify-center w-full mx-auto bg-red-200 rounded-lg shadow dark:bg-gray-800">
-                                <ul className="flex flex-col divide-y divide max-h-80 h-fit overflow-scroll">
-                                    {filteredTokens.map((token, index) => {
-                                        return (<>
-                                            <li key={index} onClick={() => handleTokenSelect(tokenListDisplay.token, token)} className="cursor-pointer flex flex-row">
-                                                <div className="flex items-center flex-1 p-4 cursor-pointer select-none">
-                                                    <div className="flex flex-col items-center justify-center w-10 h-10 mr-4">
-                                                        <a className="relative block">
-                                                            {(token.symbol === "UNI" || token.symbol === "WETH") ? <Token tokenName={token.symbol} /> : <img alt="coin" src={token.logoURI} className="mx-auto object-cover rounded-full h-10 w-10 " />}
-                                                        </a>
-                                                    </div>
-                                                    <div className="flex-1 pl-1 mr-16">
-                                                        <div className="font-medium dark:text-white">
-                                                            {token.name}
-                                                        </div>
-                                                        <div className="text-sm text-gray-600 dark:text-gray-200">
-                                                            {token.symbol}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        </>)
-                                    })}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>)}
+                {
+                    tokenListDisplay ? <TokenList tokens={tokenList} setTokenListDisplay={setTokenListDisplay} handleTokenSelect={handleTokenSelect} /> : null
+                }
 
             </div>
         </>
