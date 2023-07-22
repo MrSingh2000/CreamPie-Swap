@@ -162,24 +162,24 @@ export default function Tokens(props) {
         <>
             <div className=''>
                 <div className="container max-w-full px-4 mx-auto sm:px-8">
-                    <div className=" flex justify-center items-center lg:justify-around flex-col lg:flex-row">
+                    <div className=" flex justify-center items-center lg:justify-around flex-col lg:flex-row text-white">
                         {/* TOKENS */}
                         <div className="px-4 py-4 -mx-4 overflow-x-auto sm:-mx-8 sm:px-8 w-full lg:w-[31rem] xl:w-[35rem]">
                             <div className="inline-block min-w-full overflow-hidden rounded-lg shadow ">
-                                <p className='text-xl text-left font-semibold pb-2'>Available Tokens</p>
-                                <table className="min-w-full leading-normal">
+                                <p className='text-xl text-left font-semibold pb-2 font-mono'>Available Tokens</p>
+                                <table className="min-w-full leading-normal bg-[#ffffff]">
                                     <thead className=''>
-                                        <tr>
-                                            <th scope="col" className="px-5 py-3 text-sm font-semibold text-lg text-center text-gray-800 uppercase bg-white border-b border-gray-200">
+                                        <tr className=''>
+                                            <th scope="col" className="bg-[#35007a] text-white px-5 py-3 text-sm font-semibold text-lg text-center text-gray-800 uppercase bg-white border-b border-gray-200">
                                                 #
                                             </th>
-                                            <th scope="col" className="px-5 py-3 text-sm font-semibold text-lg text-center text-gray-800 uppercase bg-white border-b border-gray-200">
+                                            <th scope="col" className="bg-[#35007a] text-white px-5 py-3 text-sm font-semibold text-lg text-center text-gray-800 uppercase bg-white border-b border-gray-200">
                                                 Token
                                             </th>
-                                            <th scope="col" className="px-5 py-3 text-sm font-semibold text-lg text-center text-gray-800 uppercase bg-white border-b border-gray-200">
+                                            <th scope="col" className="bg-[#35007a] text-white px-5 py-3 text-sm font-semibold text-lg text-center text-gray-800 uppercase bg-white border-b border-gray-200">
                                                 TVL
                                             </th>
-                                            <th scope="col" className="px-5 py-3 text-sm font-semibold text-lg text-center text-gray-800 uppercase bg-white border-b border-gray-200">
+                                            <th scope="col" className="bg-[#35007a] text-white px-5 py-3 text-sm font-semibold text-lg text-center text-gray-800 uppercase bg-white border-b border-gray-200">
                                                 Volume
                                             </th>
                                         </tr>
@@ -259,17 +259,17 @@ export default function Tokens(props) {
                         {/* POOLS */}
                         <div className="px-4 py-4 -mx-4 overflow-x-auto sm:-mx-8 sm:px-8 w-full lg:w-[31rem] xl:w-[35rem]">
                             <div className="inline-block min-w-full overflow-hidden rounded-lg shadow">
-                                <p className='text-xl text-left font-semibold pb-2'>Available Pools</p>
+                                <p className='text-xl text-left font-semibold pb-2 font-mono'>Available Pools</p>
                                 <table className="min-w-full leading-normal">
                                     <thead>
                                         <tr>
-                                            <th scope="col" className="px-5 py-3 text-sm font-semibold text-lg text-center text-gray-800 uppercase bg-white border-b border-gray-200">
+                                            <th scope="col" className="bg-[#35007a] text-white px-5 py-3 text-sm font-semibold text-lg text-center text-gray-800 uppercase bg-white border-b border-gray-200">
                                                 #
                                             </th>
-                                            <th scope="col" className="px-5 py-3 text-sm font-semibold text-lg text-center text-gray-800 uppercase bg-white border-b border-gray-200">
+                                            <th scope="col" className="bg-[#35007a] text-white px-5 py-3 text-sm font-semibold text-lg text-center text-gray-800 uppercase bg-white border-b border-gray-200">
                                                 Pool
                                             </th>
-                                            <th scope="col" className="px-5 py-3 text-sm font-semibold text-lg text-center text-gray-800 uppercase bg-white border-b border-gray-200">
+                                            <th scope="col" className="bg-[#35007a] text-white px-5 py-3 text-sm font-semibold text-lg text-center text-gray-800 uppercase bg-white border-b border-gray-200">
                                                 Volume
                                             </th>
                                         </tr>

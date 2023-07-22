@@ -1,6 +1,5 @@
 import React from 'react';
 import { AiOutlineCloseSquare } from 'react-icons/ai';
-import { VariableSizeList as List } from 'react-window';
 
 function TokenItem({ token, handleTokenSelect }) {
     return (
@@ -25,11 +24,11 @@ function TokenItem({ token, handleTokenSelect }) {
 }
 
 function TokenList(props) {
-    const { tokens, setTokenListDisplay, handleTokenSelect } = props;
+    const { tokens, handleTokenSelect, setTokenListDisplay } = props;
 
     return (
         <div className="fixed top-0 w-full h-full">
-            <div className='bg-[#F1FFEB] w-screen h-screen absolute opacity-50'>
+            <div className='bg-[#DBDFD9] w-screen h-screen absolute opacity-50'>
             </div>
             <div className="text-xs md:text-base inset-0 z-10 w-full max-w-80 md:max-w-96 h-screen overflow-y-auto flex flex-col justify-center items-center z-10 absolute border-2">
                 <div>

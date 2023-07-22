@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import logo from '../assets/cp_logo.png';
 
 export default function Navbar() {
     let location = useLocation();
@@ -9,19 +10,19 @@ export default function Navbar() {
 
     return (
         <>
-            <nav className="bg-white dark:bg-gray-800 w-full shadow py-4 bg-yellow-200">
+            <nav className="bg-gradient-to-b from-[#000000] from-20% via-[#111111] via-40% to-[#232323] dark:bg-gray-800 w-full shadow text-white">
                 <div className="px-8 mx-auto">
                     <div className="flex items-center justify-between h-16">
                         <div className=" flex items-center">
                             <a className="flex-shrink-0" href="/">
-                                <img className="w-8 h-8" src="#" alt="Workflow" />
+                                <img className="w-12 h-12 rounded-full" src={logo} alt="Workflow" />
                             </a>
                             <div className="hidden md:block">
                                 <div className="flex items-baseline ml-10 space-x-4">
                                     <NavLink to='/' className='hover:text-gray-800 dark:hover:text-white px-3 py-2 rounded-md text-md font-medium'
                                         style={({ isActive }) => {
                                             return {
-                                                color: isActive ? 'black' : '#8E8E7B',
+                                                color: isActive ? 'white' : '#8E8E7B',
                                             }
                                         }}
                                     >
@@ -30,7 +31,7 @@ export default function Navbar() {
                                     <NavLink to='/tokens' className='hover:text-gray-800 dark:hover:text-white px-3 py-2 rounded-md text-md font-medium'
                                         style={({ isActive }) => {
                                             return {
-                                                color: isActive ? 'black' : '#8E8E7B',
+                                                color: isActive ? 'white' : '#8E8E7B',
                                             }
                                         }}>
                                         Tokens
