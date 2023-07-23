@@ -121,7 +121,7 @@ function App() {
   return (
     <>
       <Routes>
-        <Route element={<Navbar />} path='/'>
+        <Route element={<Navbar account={account}/>} path='/'>
           <Route index element={<Home quoter={quoter} provider={provider} tokenList={tokenList} chainId={chainId} contract={contract} account={account} signer={signer} sepoliaList={sepoliaList} />} />
           <Route path='tokens' element={<Tokens loader={loader} setLoader={setLoader} />} />
           <Route path='about' element={<About />} />

@@ -1,12 +1,8 @@
 import React, { useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { ToastContainer, toast } from 'react-toastify';
+import { NavLink, Outlet} from 'react-router-dom'
 import logo from '../assets/cp_logo.png';
-import { showToast } from '../helpers';
 
-export default function Navbar() {
-    let location = useLocation();
-    let path = location.pathname;
+export default function Navbar({ account }) {
 
     const [showMenu, setShowMenu] = useState(false);
 
@@ -15,7 +11,7 @@ export default function Navbar() {
             <nav className="bg-gradient-to-b from-[#000000] from-20% via-[#111111] via-40% to-[#232323] dark:bg-gray-800 w-full shadow text-white md:static fixed md:z-0 z-40">
                 <div className="px-8 mx-auto">
                     <div className="flex items-center justify-between h-16">
-                        <div className=" flex items-center">
+                        <div className="flex items-center">
                             <NavLink to="/" className="flex-shrink-0" href="/">
                                 <img className="w-12 h-12 rounded-full" src={logo} alt="Workflow" />
                             </NavLink>
@@ -48,6 +44,11 @@ export default function Navbar() {
                                     </NavLink>
                                 </div>
                             </div>
+                        </div>
+                        <div>
+                            <p className='font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent'>
+                                {account.substr(0,6)}...{account.substr(-4,)}
+                            </p>
                         </div>
                         <div className="flex -mr-2 md:hidden">
                             <button onClick={() => setShowMenu((prev) => !prev)} className="text-gray-800 dark:text-white hover:text-gray-300 inline-flex items-center justify-center p-2 rounded-md focus:outline-none">
