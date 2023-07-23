@@ -1,13 +1,14 @@
 import React from 'react';
 import { AiOutlineCloseSquare } from 'react-icons/ai';
+import Token from './Token';
 
 function TokenItem({ token, handleTokenSelect }) {
     return (
-        <li onClick={() => handleTokenSelect(token)} className="cursor-pointer flex flex-row">
+        <li onClick={() => handleTokenSelect(token)} className="hover:bg-gray-100 cursor-pointer flex flex-row">
             <div className="flex items-center flex-1 p-4 cursor-pointer select-none">
                 <div className="flex flex-col items-center justify-center w-10 h-10 mr-4">
                     <a className="relative block">
-                        <img alt="coin" src={token.logoURI} loading='lazy' className="mx-auto object-cover rounded-full h-10 w-10 " />
+                        {token?.symbol === "UNI" || token?.symbol === "WETH" || token?.symbol === "ETH" ? <Token tokenName={token.symbol} /> : (<img alt="coin" src={token.logoURI} loading='lazy' className="mx-auto object-cover rounded-full h-10 w-10 " />)}
                     </a>
                 </div>
                 <div className="flex-1 pl-1 mr-16">
@@ -32,8 +33,8 @@ function TokenList(props) {
             </div>
             <div className="text-xs md:text-base inset-0 z-10 w-full max-w-80 md:max-w-96 h-screen overflow-y-auto flex flex-col justify-center items-center z-10 absolute border-2">
                 <div>
-                    <div className="container flex flex-col justify-center w-full mx-auto bg-red-200 rounded-lg shadow dark:bg-gray-800">
-                        <div className='bg-yellow-200 w-full rounded-t-lg flex justify-end p-1'>
+                    <div className="container flex flex-col justify-center w-full mx-auto bg-white rounded-lg shadow dark:bg-gray-800">
+                        <div className='bg-gray-200 w-full rounded-t-lg flex justify-end p-1'>
                             <AiOutlineCloseSquare className='cursor-pointer' onClick={() => {
                                 setTokenListDisplay(false);
                             }} />

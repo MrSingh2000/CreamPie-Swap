@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import Widget from './Widget'
-import Navbar from './Navbar'
-import { Outlet, useLocation } from 'react-router-dom'
 import Token from '../helpers/Token';
-import { tokenSlice, updateToken0, updateToken0Count, updateToken1, updateToken1Count } from '../state/slices/tokens';
+import { updateToken0, updateToken0Count, updateToken1, updateToken1Count } from '../state/slices/tokens';
 import { useDispatch, useSelector } from 'react-redux';
 import { ethers } from 'ethers';
 import { updateLoading } from '../state/slices/loading';
 import Spinner from '../helpers/Spinner';
 import TokenList from '../helpers/TokenList';
 import LoadingScreen from '../helpers/LoadingScreen';
-import { useRef } from 'react';
+import { showToast, ERC20abi } from '../helpers';
 
 export default function Home(props) {
     const dispatch = useDispatch();
@@ -22,7 +19,7 @@ export default function Home(props) {
     const [customMessage, setCustomMessage] = useState({
         message: "",
         hash: "",
-        success: null
+        success: 0
     })
 
     const { tokenList, chainId, contract, account, signer, quoter, provider, sepoliaList } = props;
@@ -61,7 +58,6 @@ export default function Home(props) {
             setFilteredTokens(newList);
             updateTokenFunc(0, newList[0], 0);
             updateTokenFunc(1, newList[1], 0);
-            console.log(newList);
         }
         chainId && filterTokens();
     }, [tokenList, chainId]);
@@ -72,270 +68,69 @@ export default function Home(props) {
     }
 
     const handleQuote = async (first, second) => {
-        console.log("first: ", first, " Second: ", second);
         setGettingQuote(true);
         dispatch(updateLoading(true));
-        let data = await quoter.callStatic.quoteExactInputSingle(first.data.address, second.data.address, 3000, ethers.utils.parseEther(first.count), 0);
-        console.log("data: ", ethers.utils.formatUnits(data));
+        await quoter.callStatic.quoteExactInputSingle(first.data.address, second.data.address, 3000, ethers.utils.parseEther(first.count), 0)
+            .then((data) => {
+                if (first === token0)
+                    dispatch(updateToken1Count(parseFloat(ethers.utils.formatUnits(data)).toFixed(4)));
+                else
+                    dispatch(updateToken0Count(parseFloat(ethers.utils.formatUnits(data)).toFixed(4)));
 
-        if (first === token0)
-            dispatch(updateToken1Count(parseFloat(ethers.utils.formatUnits(data)).toFixed(4)));
-        else
-            dispatch(updateToken0Count(parseFloat(ethers.utils.formatUnits(data)).toFixed(4)));
+                setQuote(({
+                    value: (parseFloat(first.count) / (parseFloat(ethers.utils.formatUnits(data)).toFixed(4))).toFixed(4),
+                    token0: first,
+                    token1: second
+                }));
+            }).catch((err) => {
+                showToast(err.message);
+            });
 
-        console.log(ethers.utils.formatUnits(data));
-        console.log(parseFloat(ethers.utils.formatUnits(data)));
-        console.log(parseFloat(first.count));
-        console.log(parseFloat(first.count) / (parseFloat(ethers.utils.formatUnits(data))));
-
-        setQuote(({
-            value: (parseFloat(first.count) / (parseFloat(ethers.utils.formatUnits(data)).toFixed(4))).toFixed(4),
-            token0: first,
-            token1: second
-        }));
 
         dispatch(updateLoading(false));
         setGettingQuote(false);
     }
 
-    const getTransactionLog = async (hash, trial = 1) => {
-        const receipt = await provider.getTransactionReceipt('0xa5f2123ff5fde19d3ca925405046e6f59e3dcdf421d43ad9852f835718b8cb39');
-        console.log(receipt);
-        if (trial === 10)
-            console.log("Transaction Failed");
-        if (receipt.status === 1)
-            console.log("Transaction Success");
-        else {
-            console.log("Trial: ", trial);
-            trial += 1;
+    const delay = (ms) => {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    const getTransactionLog = async (hash, callCount = 0) => {
+        try {
+            if (callCount >= 10) {
+                throw "Transaction Unsuccessful";
+            }
+
+            const receipt = await provider.getTransactionReceipt(hash);
+
+            if (receipt && receipt.status === 1) {
+                return receipt;
+            }
+
+            if (receipt && receipt.status === 0 && receipt.logs.length > 0) {
+                const revertEvent = receipt.logs.find(log => log.topics[0] === ethers.utils.id("Revert(address,string)"));
+
+                if (revertEvent) {
+                    const errorData = revertEvent.data;
+                    const errorReason = ethers.utils.toUtf8String(errorData);
+                    // Handle the revert reason here if needed
+                    throw errorReason
+                } else {
+                    throw "Transaction Reverted";
+                }
+            }
+
+            // Wait for 5 seconds and then call the function again
+            await delay(5000);
+            return getTransactionLog(hash, callCount + 1);
+        } catch (error) {
+            throw error;
         }
     }
 
     const handleSwap = async () => {
         try {
             dispatch(updateLoading(true));
-            const ERC20abi = [
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "name",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "string"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "_spender",
-                            "type": "address"
-                        },
-                        {
-                            "name": "_value",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "approve",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "bool"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "totalSupply",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "_from",
-                            "type": "address"
-                        },
-                        {
-                            "name": "_to",
-                            "type": "address"
-                        },
-                        {
-                            "name": "_value",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "transferFrom",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "bool"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "decimals",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint8"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [
-                        {
-                            "name": "_owner",
-                            "type": "address"
-                        }
-                    ],
-                    "name": "balanceOf",
-                    "outputs": [
-                        {
-                            "name": "balance",
-                            "type": "uint256"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "symbol",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "string"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "_to",
-                            "type": "address"
-                        },
-                        {
-                            "name": "_value",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "transfer",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "bool"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [
-                        {
-                            "name": "_owner",
-                            "type": "address"
-                        },
-                        {
-                            "name": "_spender",
-                            "type": "address"
-                        }
-                    ],
-                    "name": "allowance",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "payable": true,
-                    "stateMutability": "payable",
-                    "type": "fallback"
-                },
-                {
-                    "anonymous": false,
-                    "inputs": [
-                        {
-                            "indexed": true,
-                            "name": "owner",
-                            "type": "address"
-                        },
-                        {
-                            "indexed": true,
-                            "name": "spender",
-                            "type": "address"
-                        },
-                        {
-                            "indexed": false,
-                            "name": "value",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "Approval",
-                    "type": "event"
-                },
-                {
-                    "anonymous": false,
-                    "inputs": [
-                        {
-                            "indexed": true,
-                            "name": "from",
-                            "type": "address"
-                        },
-                        {
-                            "indexed": true,
-                            "name": "to",
-                            "type": "address"
-                        },
-                        {
-                            "indexed": false,
-                            "name": "value",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "Transfer",
-                    "type": "event"
-                }
-            ]
             // establish connection with the ERC20 token contract of the token being swapped
             const ERC20TokenContract = new ethers.Contract(token0.data.address, ERC20abi, signer);
 
@@ -345,39 +140,92 @@ export default function Home(props) {
             // approval of spending tokens from the account of the spender, approval request sent to ERC20 token
             const maxApproval = ethers.BigNumber.from(2).pow(256).sub(1);
 
-            setCustomMessage({
-                message: "Waiting for token allowance",
-                hash: null,
-                success: null
-            })
+            setCustomMessage((prev) => {
+                return {
+                    ...prev,
+                    message: "Waiting for token allowance",
+                }
+            });
 
             dispatch(updateLoading(true));
+
+            // token approval
             await ERC20TokenContract.approve(targetAllowanceContract, maxApproval, {
                 gasLimit: 2000000
             }).then(async (txn) => {
-                console.log("approval: ", txn);
-                let result = await contract.swapExactInputSingle(ethers.utils.parseEther((token0.count).toString()), token0.data.address, token1.data.address, {
-                    gasLimit: ethers.utils.hexlify(2000000)
-                })
-                console.log('Transaction successful:', result);
-                // const reciept = await getTransactionLog(result.hash);
-                // console.log("reciept: ", reciept);
-            }).catch((err) => {
-                console.log("Error while approval: ", err);
+                setCustomMessage((prev) => {
+                    return {
+                        ...prev, hash: txn.hash
+                    }
+                });
+                //  get transaction details of the token approval call
+                await getTransactionLog(txn.hash).then(async (res) => {
+                    setCustomMessage((prev) => {
+                        return { ...prev, success: 1 };
+                    });
+                    await delay(3000);
+
+                    setCustomMessage({
+                        message: "Swap submitted, please wait",
+                        hash: "",
+                        success: 0,
+                    });
+                    // token swap request
+                    await contract.swapExactInputSingle(ethers.utils.parseEther((token0.count).toString()), token0.data.address, token1.data.address, {
+                        gasLimit: ethers.utils.hexlify(2000000)
+                    }).then(async (res) => {
+                        setCustomMessage((prev) => {
+                            return { ...prev, hash: res.hash };
+                        });
+                        // get transaction details of token swap call
+                        await getTransactionLog(res.hash).then(async (res) => {
+                            setCustomMessage((prev) => {
+                                return { ...prev, success: 1 };
+                            });
+
+                            await delay(5000);
+
+                            dispatch(updateLoading(false));
+                            showToast("Swap Successful", "success");
+                        }).catch((err) => {
+                            showToast(err);
+                            dispatch(updateLoading(false));
+                        })
+                    }).catch((err) => {
+                        showToast(err.message);
+                        dispatch(updateLoading(false));
+                    })
+
+                }).catch((error) => {
+                    if (error.message.includes("user rejected transaction")) {
+                        showToast("Transaction rejected by the user");
+                    } else {
+                        showToast("Error sending transaction");
+                    }
+                    dispatch(updateLoading(false));
+                });
+            }).catch((error) => {
+                if (error.message.includes("user rejected transaction")) {
+                    showToast("Transaction rejected by the user");
+                } else {
+                    showToast("Error sending transaction:", error.message);
+                    console.log(error);
+                }
+                dispatch(updateLoading(false));
             });
 
-            dispatch(updateLoading(false));
-
-            // const reciept = await ethers.c
-            // const transaction = await provider.sendTra(txn.hash);
-            // console.log("txn: ", transaction);
+            setCustomMessage({
+                message: "",
+                hash: "",
+                success: 0
+            })
         } catch (error) {
-            console.error('Transaction failed:', error.message);
+            showToast(error.message);
+            dispatch(updateLoading(false));
         }
     }
 
     const handleValueChange = async (e, token) => {
-        console.log(typeof e.target.value)
         if (token === 0) {
             dispatch(updateToken0Count(e.target.value));
             if (token1.count !== 0)
@@ -393,9 +241,9 @@ export default function Home(props) {
 
     return (
         <>
-            <div className='flex justify-center items-center mt-[15vh] flex-col '>
-                <div className='bg-[#232323] border-2 border-[#111111] max-w-xl rounded-lg px-4 py-2 custom-shadow'>
-                    <p className='text-white py-2 font-semibold font-sans'>SWAP Token</p>
+            <div className='flex justify-center items-center md:mt-[15vh] pt-20 md:pt-0 flex-col '>
+                <div className='bg-[#960FDF] border-2 border-[#111111] max-w-xl rounded-lg px-4 py-2 custom-shadow'>
+                    <p className='text-white py-2 font-bold font-sans'>SWAP Token</p>
 
                     <div className=''>
                         <div className="relative mt-1 rounded-md shadow-sm">
@@ -422,7 +270,7 @@ export default function Home(props) {
                     <div className=''>
                         <div className="relative mt-1 rounded-md shadow-sm">
                             <div className="absolute inset-y-0 left-0 flex items-center pl-1 pointer-events-none">
-                                {token1?.data?.symbol === "UNI" || token1?.data?.symbol === "WETH" || token0?.data?.symbol === "ETH" ? <Token tokenName={token1.data.symbol} /> : <img className='h-6' src={token1.data ? token1.data.logoURI : "#"} alt="logo" />}
+                                {token1?.data?.symbol === "UNI" || token1?.data?.symbol === "WETH" || token1?.data?.symbol === "ETH" ? <Token tokenName={token1.data.symbol} /> : <img className='h-6' src={token1.data ? token1.data.logoURI : "#"} alt="logo" />}
                             </div>
                             {!token0.count || token1.count ? (<input onChange={(e) => handleValueChange(e, 1)} value={token1?.count >= 0 ? token1?.count : ""} type="text" name="price" id="price" className="block w-full px-6 py-4 pr-12 border-t border-b border-l border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 pl-7 text-lg" placeholder="0.00" />) : (
                                 <div className='bg-white block w-full px-6 py-4 pr-12 border-t border-b border-l border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 pl-7 text-lg'>
@@ -441,15 +289,15 @@ export default function Home(props) {
                             </div>
                         </div>
                     </div>
-                    {quote && <div className='bg-[#7a7a7a] text-white font-mono text-start text-sm py-2 px-1 my-1 rounded-xl'>
+                    {quote && <div className='bg-gray-200 text-black font-mono text-start text-sm py-2 px-1 my-1 rounded-xl'>
                         {`1 ${quote.token1.data.symbol} = ${quote.value} ${quote.token0.data.symbol}`}
                     </div>}
 
-                    <button type="button" onClick={handleSwap} className="py-2 px-4 mt-4 bg-[#000000] hover:bg-[#111111] focus:ring-indigo-500 focus:ring-offset-[#111111] text-white w-92 transition ease-in duration-200 text-center text-base font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg font-sans custom-white-shadow">
+                    <button type="button" onClick={handleSwap} className="py-2 px-4 my-4 bg-[#000000] hover:bg-[#111111] focus:ring-indigo-500 focus:ring-offset-[#111111] text-white w-92 transition ease-in duration-200 text-center text-base font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg font-sans custom-white-shadow">
                         Swap
                     </button>
 
-                    {/* <button type="button" onClick={getLog} className="py-2 px-4 mt-4 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white w-92 transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
+                    {/* <button type="button" onClick={validateBalance} className="py-2 px-4 mt-4 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white w-92 transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg ">
                         Status
                     </button> */}
 

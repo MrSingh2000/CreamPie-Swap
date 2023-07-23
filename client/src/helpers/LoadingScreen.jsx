@@ -1,5 +1,6 @@
 import React from 'react'
-import Spinner from './Spinner'
+import { BsPatchCheck, BsFillPatchCheckFill } from 'react-icons/bs';
+import {BiCheckCircle} from 'react-icons/bi';
 
 function LoadingScreen({ message }) {
     const tempMessage = {
@@ -13,13 +14,15 @@ function LoadingScreen({ message }) {
             </div>
             <div className="text-xs md:text-base inset-0 z-10 w-full max-w-80 md:max-w-96 h-screen overflow-y-auto flex flex-col justify-center items-center z-10 absolute border-2">
                 <div>
-                    <div className="p-4 container flex flex-col justify-center items-center w-full mx-auto bg-red-200 rounded-lg shadow dark:bg-gray-800">
-                        <div className='loader'></div>
+                    <div className="p-4 container flex flex-col justify-center items-center border-2 border-[#FF8800] w-full mx-auto bg-white rounded-lg shadow-xl dark:bg-gray-800">
+                        {message.success === 1 ? (
+                            <BiCheckCircle size={48} color='#46E112'/>
+                        ) : (<div className='loader'></div>)}
                         <div className='font-sans text-xl font-semibold mt-6'>
                             {message.message}
                         </div>
                         {message.hash && <div className='font-sans text-sm py-2'>
-                            Transaction Hash: {message.hash}
+                            <span className='font-semibold'>Transaction Hash:</span> <span className='font-mono'>{message.hash}</span>
                         </div>}
                     </div>
                 </div>

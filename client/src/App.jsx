@@ -8,6 +8,10 @@ import axios from 'axios';
 import { ethers } from "ethers";
 import SimpleSwap from "./artifacts/contracts/SimpleSwap.sol/SimpleSwap.json";
 import QuoterV2 from "@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { showToast } from './helpers';
+import About from './components/About';
 
 function App() {
   const [loader, setLoader] = useState(false);
@@ -80,13 +84,12 @@ function App() {
 
     const connectWallet = async () => {
       let p;
-      console.log(window.ethereum)
       // get provider
       if (window.ethereum) {
         p = new ethers.providers.Web3Provider(window.ethereum)
       }
       else {
-        console.log("MetaMask not installed; using read-only defaults")
+        showToast("MetaMask not installed")
         p = ethers.getDefaultProvider();
       }
 
@@ -95,7 +98,7 @@ function App() {
       setSigner(s);
       setProvider(p);
       // get account
-      let a = await provider.send("eth_requestAccounts", []);;
+      let a = await p.send("eth_requestAccounts", []);;
       setAccount(a[0]);
       // intialize contract
       const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
@@ -105,7 +108,6 @@ function App() {
       // set active chain ID
       const n = await p.getNetwork();
       setChainId(ethers.BigNumber.from(n.chainId).toNumber());
-      console.log("chainId: ", ethers.BigNumber.from(n.chainId).toNumber());
 
       // getting quoter
       const q = new ethers.Contract(import.meta.env.VITE_QUOTER_ADDRESS, QuoterV2.abi, s);
@@ -113,9 +115,6 @@ function App() {
     }
 
     connectWallet();
-    // getAssets();
-
-
   }, [])
 
 
@@ -125,8 +124,22 @@ function App() {
         <Route element={<Navbar />} path='/'>
           <Route index element={<Home quoter={quoter} provider={provider} tokenList={tokenList} chainId={chainId} contract={contract} account={account} signer={signer} sepoliaList={sepoliaList} />} />
           <Route path='tokens' element={<Tokens loader={loader} setLoader={setLoader} />} />
+          <Route path='about' element={<About />} />
         </Route>
       </Routes>
+
+      <ToastContainer
+        position="top-left"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </>
   )
 }
