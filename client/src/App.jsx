@@ -115,6 +115,7 @@ function App() {
     }
 
     connectWallet();
+    alert("Note: The application is connected to Polygon Mumbai testnet, You won't be able to perform swaps on other networks");
   }, [])
 
 
