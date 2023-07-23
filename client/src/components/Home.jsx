@@ -241,7 +241,7 @@ export default function Home(props) {
 
     return (
         <>
-            <div className='flex justify-center items-center md:mt-[15vh] pt-20 md:pt-0 flex-col '>
+            <div className='flex justify-center items-center md:mt-[15vh] pt-20 md:pt-0 flex-col'>
                 <div className='bg-[#960FDF] border-2 border-[#111111] max-w-xl rounded-lg px-4 py-2 custom-shadow'>
                     <p className='text-white py-2 font-bold font-sans'>SWAP Token</p>
 

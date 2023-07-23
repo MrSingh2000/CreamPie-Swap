@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { NavLink, Outlet} from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 import logo from '../assets/cp_logo.png';
+import Footer from './Footer';
 
 export default function Navbar({ account }) {
 
@@ -47,7 +48,7 @@ export default function Navbar({ account }) {
                         </div>
                         <div>
                             <p className='font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent'>
-                                {account.substr(0,6)}...{account.substr(-4,)}
+                                {account ? `${account.substr(0, 6)}...${account.substr(-4,)}` : null}
                             </p>
                         </div>
                         <div className="flex -mr-2 md:hidden">
@@ -102,6 +103,7 @@ export default function Navbar({ account }) {
                     </div>)}
             </nav >
             <Outlet />
+
         </>
     )
 }

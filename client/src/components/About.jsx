@@ -1,5 +1,6 @@
 import React from 'react';
 import pie from '../assets/pie.png';
+import { BsGithub, BsLinkedin, BsInstagram } from 'react-icons/bs';
 
 const About = () => {
 
@@ -43,6 +44,28 @@ const About = () => {
                     or encounter any issues while using our app, please feel free to reach out to the github repository and
                     contribute to the project. Happy swapping!
                 </p>
+
+                <h2 className="text-2xl font-semibold mb-4 mt-4">Reach Out</h2>
+                <div className="mb-6 text-left flex justify-center">
+                    <div className='w-3/4 flex justify-around'>
+                        <span className='hover:bg-gray-200 cursor-pointer w-10 h-10 flex items-center justify-center rounded-xl'>
+                            <a href="https://github.com/MrSingh2000/" referrerPolicy='no-referrer' target='_blank'>
+                                <BsGithub size={30} />
+                            </a>
+                        </span>
+                        <span className='hover:bg-gray-200 cursor-pointer w-10 h-10 flex items-center justify-center rounded-xl'>
+                            <a href="https://www.linkedin.com/in/anshuman-singh-856991201/" referrerPolicy='no-referrer' target='_blank'>
+                                <BsLinkedin size={30} color='blue' />
+                            </a>
+                        </span>
+                        <span className='hover:bg-gray-200 cursor-pointer w-10 h-10 flex items-center justify-center rounded-xl'>
+                            <a href="https://www.instagram.com/mr_singh2000" referrerPolicy='no-referrer' target='_blank'>
+                                <BsInstagram size={30} color='purple' />
+                            </a>
+                        </span>
+                    </div>
+                </div>
+                <h2 className="text-base text-right font-bold italic font-serif bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">Created By- Anshuman Singh</h2>
             </div>
         </div>
     );
