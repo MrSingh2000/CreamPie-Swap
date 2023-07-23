@@ -83,7 +83,7 @@ export default function Home(props) {
                     token1: second
                 }));
             }).catch((err) => {
-                showToast(err.message);
+                showToast("Error getting data, please check you are Polygon Mumbai network");
             });
 
 
