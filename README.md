@@ -5,7 +5,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/MrSingh2000/insta_clone">
+  <a href="https://github.com/MrSingh2000/CreamPie-Swap">
     <img src="readme/logo.png" alt="Logo" width="200" height="200">
   </a>
 
@@ -47,7 +47,7 @@
 
 ## About The Project
 
-<a href="https://gdrive3.netlify.app/">
+<a href="https://creampie-swap.netlify.app/">
 <img src="readme/1.png" alt="drawing"/>
 </a>
 
